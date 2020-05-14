@@ -1,0 +1,85 @@
+#!/usr/bin/env raku
+
+print Q:to/EOF/;
+    <html>
+      <head>
+        <title>My links</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link type="text/css" rel="stylesheet" href="/kjp.css">
+      </head>
+      <body>
+      <ul>
+    EOF
+
+my $indent;
+
+for lines() -> $line {
+    when $line ~~ / ^ '[[[' (.*) ']]]'/ {
+        my $name = $0.Str;
+        while $indent > 2 {
+            say "</ul></div>";
+            --$indent;
+        }
+        print qq:to/EOF/;
+            <button class="accordion">&gt; &gt; {$name}</button>
+            <div class="panel">
+              <ul>
+            EOF
+        ++$indent;
+    }
+    when $line ~~ / ^ '[[' (.*) ']]'/ {
+        my $name = ~$0;
+        while $indent > 1 {
+            say "</ul></div>";
+            --$indent;
+        }
+        print qq:to/EOF/;
+            <button class="accordion">&gt; {$name}</button>
+            <div class="panel">
+              <ul>
+            EOF
+        ++$indent;
+    }
+    when $line ~~ / ^ '[' (.*) ']'/ {
+        my $name = $0.Str;
+        while $indent > 0 {
+            say "</ul></div>";
+            --$indent;
+        }
+        print qq:to/EOF/;
+            <button class="accordion">{$name}</button>
+            <div class="panel">
+              <ul>
+            EOF
+        ++$indent;
+    }
+    when $line ~~ /(.*) ' -> ' (.*)/ {
+        my $url = $0;
+        my $text = $1;
+        say "<li><a href=\"{$url}\">{$text}</a></li>";
+    }
+    default {
+        note "Unrecognised line \"$line\"";
+    }
+}
+
+print Q:to/EOF/;
+        <script>
+            var acc = document.getElementsByClassName("accordion");
+            var i;
+            for (i = 0; i < acc.length; i++) {
+                     acc[i].addEventListener("click", function() {
+                         this.classList.toggle("active");
+                         var panel = this.nextElementSibling;
+                         if (panel.style.display === "block") {
+                             panel.style.display = "none";
+                         } else {
+                             panel.style.display = "block";
+                         }
+                      }
+                  );
+            }
+        </script>
+        </body>
+    </html>
+    EOF
