@@ -40,7 +40,7 @@ for lines() -> $line {
             EOF
         ++$indent;
     }
-    when $line ~~ / ^ '[' (.*) ']'/ {
+    when $line ~~ / ^ '[' (.*) ']' $ / {
         my $name = $0.Str;
         while $indent > 0 {
             say "</ul></div>";
